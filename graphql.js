@@ -61,8 +61,97 @@ const users = new GraphQLObjectType({
   }
 });
 
+const mutation = new GraphQLObjectType({
+  name: "mutation",
+  fields: {
+    addValues: {
+      type: new GraphQLList(userType),
+      args: {
+        tutorial_id: {
+          name: "tutorialId",
+          type: new GraphQLNonNull(GraphQLInt)
+        },
+        tutorial_title: {
+          name: "tutorialName",
+          type: new GraphQLNonNull(GraphQLString)
+        }
+      },
+      resolve: (root, { tutorial_id, tutorial_title }) => {
+        return new Promise((resolve, reject) => {
+          con.query(
+            "INSERT INTO tutorials_tbl (`tutorial_id`, `tutorial_title`) VALUES ('" +
+              tutorial_id +
+              "','" +
+              tutorial_title +
+              "');",
+            function(err, result) {
+              if (err) reject(err);
+              resolve(result);
+            }
+          );
+        });
+      }
+    },
+    deleteValues: {
+      type: new GraphQLList(userType),
+      args: {
+        tutorial_id: {
+          name: "tutorialId",
+          type: new GraphQLNonNull(GraphQLInt)
+        },
+        tutorial_title: {
+          name: "tutorialName",
+          type: new GraphQLNonNull(GraphQLString)
+        }
+      },
+      resolve: (root, { tutorial_id }) => {
+        return new Promise((resolve, reject) => {
+          con.query(
+            `DELETE from tutorials_tbl where tutorial_id = ${tutorial_id} `,
+            function(err, result) {
+              if (err) reject(err);
+              resolve(result);
+            }
+          );
+        });
+      }
+    },
+    updateValues: {
+      type: new GraphQLList(userType),
+      args: {
+        tutorial_id: {
+          name: "tutorialId",
+          type: new GraphQLNonNull(GraphQLInt)
+        },
+        tutorial_title: {
+          name: "tutorialName",
+          type: new GraphQLNonNull(GraphQLString)
+        }
+      },
+      resolve: (root, { tutorial_id, tutorial_title }) => {
+        return new Promise((resolve, reject) => {
+          con.query(
+            "UPDATE tutorials_tbl SET `tutorial_title` = " +
+              "'" +
+              tutorial_title +
+              "'" +
+              " where `tutorial_id` =" +
+              tutorial_id,
+            function(err, result) {
+              console.log("error in updating", err);
+              if (err) reject(err);
+              resolve(result);
+            }
+          );
+        });
+      }
+    }
+  }
+});
+
 const schema = new GraphQLSchema({
-  query: users
+  query: users,
+  mutation
 });
 
 // parse application/x-www-form-urlencoded
