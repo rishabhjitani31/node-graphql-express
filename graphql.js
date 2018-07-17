@@ -40,21 +40,12 @@ const users = new GraphQLObjectType({
   fields: {
     users: {
       type: new GraphQLList(userType),
-      args: {
-        tutorial_id: {
-          name: "tutorialId",
-          type: new GraphQLNonNull(GraphQLInt)
-        }
-      },
-      resolve: (root, { tutorial_id }) => {
+      resolve: root => {
         return new Promise((resolve, reject) => {
-          con.query(
-            `select * from tutorials_tbl where tutorial_id = ${tutorial_id} `,
-            function(err, result) {
-              if (err) reject(err);
-              resolve(result);
-            }
-          );
+          con.query(`select * from tutorials_tbl `, function(err, result) {
+            if (err) reject(err);
+            resolve(result);
+          });
         });
       }
     }
@@ -76,8 +67,8 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString)
         }
       },
-      resolve: (root, { tutorial_id, tutorial_title }) => {
-        return new Promise((resolve, reject) => {
+      resolve: async (root, { tutorial_id, tutorial_title }) => {
+        const response = await new Promise((resolve, reject) => {
           con.query(
             "INSERT INTO tutorials_tbl (`tutorial_id`, `tutorial_title`) VALUES ('" +
               tutorial_id +
@@ -90,6 +81,7 @@ const mutation = new GraphQLObjectType({
             }
           );
         });
+        return [response];
       }
     },
     deleteValues: {
@@ -98,14 +90,10 @@ const mutation = new GraphQLObjectType({
         tutorial_id: {
           name: "tutorialId",
           type: new GraphQLNonNull(GraphQLInt)
-        },
-        tutorial_title: {
-          name: "tutorialName",
-          type: new GraphQLNonNull(GraphQLString)
         }
       },
-      resolve: (root, { tutorial_id }) => {
-        return new Promise((resolve, reject) => {
+      resolve: async (root, { tutorial_id }) => {
+        const response = await new Promise((resolve, reject) => {
           con.query(
             `DELETE from tutorials_tbl where tutorial_id = ${tutorial_id} `,
             function(err, result) {
@@ -114,6 +102,7 @@ const mutation = new GraphQLObjectType({
             }
           );
         });
+        return [response];
       }
     },
     updateValues: {
@@ -128,8 +117,8 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString)
         }
       },
-      resolve: (root, { tutorial_id, tutorial_title }) => {
-        return new Promise((resolve, reject) => {
+      resolve: async (root, { tutorial_id, tutorial_title }) => {
+        const response = await new Promise((resolve, reject) => {
           con.query(
             "UPDATE tutorials_tbl SET `tutorial_title` = " +
               "'" +
@@ -144,6 +133,7 @@ const mutation = new GraphQLObjectType({
             }
           );
         });
+        return [response];
       }
     }
   }
